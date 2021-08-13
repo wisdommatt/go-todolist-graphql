@@ -6,7 +6,7 @@ import "gorm.io/gorm"
 type Repository interface {
 	Save(todo *Todo) error
 	GetTodoById(id int) (todo Todo, err error)
-	GetTodos(status string) (todos []Todo, err error)
+	GetTodos(status, search string) (todos []Todo, err error)
 	DeleteById(id int) error
 }
 
@@ -35,12 +35,12 @@ func (repo *TodoRepo) GetTodoById(id int) (todo Todo, err error) {
 }
 
 // GetTodos retrieves todos from the database by filter.
-func (repo *TodoRepo) GetTodos(status string) (todos []Todo, err error) {
+func (repo *TodoRepo) GetTodos(status, search string) (todos []Todo, err error) {
 	if status != "" {
-		db := repo.db.Where("status = ?", status).Find(&todos)
+		db := repo.db.Where("status = ? AND task LIKE ?", status, "%"+search+"%").Find(&todos)
 		return todos, db.Error
 	}
-	db := repo.db.Find(&todos)
+	db := repo.db.Where("task LIKE ?", "%"+search+"%").Find(&todos)
 	return todos, db.Error
 }
 

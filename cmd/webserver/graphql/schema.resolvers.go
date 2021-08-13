@@ -34,12 +34,16 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 }
 
 // GetTodos is the query resolver to return all todos.
-func (r *queryResolver) GetTodos(ctx context.Context, statusP *string) ([]todo.Todo, error) {
+func (r *queryResolver) GetTodos(ctx context.Context, statusP, searchP *string) ([]todo.Todo, error) {
 	status := ""
 	if statusP != nil {
 		status = *statusP
 	}
-	todos, err := r.TodoRepo.GetTodos(status)
+	search := ""
+	if searchP != nil {
+		search = *searchP
+	}
+	todos, err := r.TodoRepo.GetTodos(status, search)
 	if err != nil {
 		return nil, errors.New("An error occured while retrieiving todos !")
 	}

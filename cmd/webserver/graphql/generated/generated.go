@@ -51,7 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetTodos func(childComplexity int, status *string) int
+		GetTodos func(childComplexity int, status *string, search *string) int
 	}
 
 	Todo struct {
@@ -67,7 +67,7 @@ type MutationResolver interface {
 	DeleteTodo(ctx context.Context, todoID int) (*todo.Todo, error)
 }
 type QueryResolver interface {
-	GetTodos(ctx context.Context, status *string) ([]todo.Todo, error)
+	GetTodos(ctx context.Context, status *string, search *string) ([]todo.Todo, error)
 }
 
 type executableSchema struct {
@@ -119,7 +119,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetTodos(childComplexity, args["status"].(*string)), true
+		return e.complexity.Query.GetTodos(childComplexity, args["status"].(*string), args["search"].(*string)), true
 
 	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
@@ -236,7 +236,7 @@ type Mutation {
 }
 
 type Query {
-  getTodos(status: String): [Todo!]!
+  getTodos(status: String, search: String): [Todo!]!
 }
 `, BuiltIn: false},
 }
@@ -303,6 +303,15 @@ func (ec *executionContext) field_Query_getTodos_args(ctx context.Context, rawAr
 		}
 	}
 	args["status"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg1
 	return args, nil
 }
 
@@ -453,7 +462,7 @@ func (ec *executionContext) _Query_getTodos(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetTodos(rctx, args["status"].(*string))
+		return ec.resolvers.Query().GetTodos(rctx, args["status"].(*string), args["search"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
