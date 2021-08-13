@@ -52,7 +52,10 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, todoId int) (*todo.To
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Todo with id: '%d' does not exist !", todoId))
 	}
-	// err = r.To
+	err = r.TodoRepo.DeleteById(todoId)
+	if err != nil {
+		return nil, errors.New("An error occured while deleting todo, please try again later !")
+	}
 	return &todoWithId, nil
 }
 
