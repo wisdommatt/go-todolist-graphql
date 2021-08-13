@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 // Repository is the interface that describes a todo repository object.
 type Repository interface {
+	Save(todo *Todo) error
 }
 
 // TodoRepo is the default implementation for the repository interface.

@@ -42,6 +42,9 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  Todo:
+    model:
+      - "github.com/wisdommatt/go-todolist-graphql/internal/todo.Todo"
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID

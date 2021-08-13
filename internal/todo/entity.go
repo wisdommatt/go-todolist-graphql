@@ -1,7 +1,10 @@
 package todo
 
+import "time"
+
 type Todo struct {
-	ID     string
-	Task   string
-	Status string
+	ID        int `gorm:"autoIncrement,primaryKey"`
+	Task      string
+	Status    string
+	TimeAdded time.Time
 }
