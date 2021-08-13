@@ -7,6 +7,7 @@ type Repository interface {
 	Save(todo *Todo) error
 	GetTodoById(id int) (todo Todo, err error)
 	GetTodos(status string) (todos []Todo, err error)
+	DeleteById(id int) error
 }
 
 // TodoRepo is the default implementation for the repository interface.
@@ -23,22 +24,28 @@ func NewRepository(db *gorm.DB) *TodoRepo {
 
 // Save saves a todo to the database.
 func (repo *TodoRepo) Save(todo *Todo) error {
-	repo.db.Create(todo)
-	return nil
+	db := repo.db.Create(todo)
+	return db.Error
 }
 
 // GetTodoById retrieves a todo from the database by id.
 func (repo *TodoRepo) GetTodoById(id int) (todo Todo, err error) {
-	repo.db.Where("id = ?", id).First(&todo)
-	return todo, nil
+	db := repo.db.Where("id = ?", id).First(&todo)
+	return todo, db.Error
 }
 
 // GetTodos retrieves todos from the database by filter.
 func (repo *TodoRepo) GetTodos(status string) (todos []Todo, err error) {
 	if status != "" {
-		repo.db.Where("status = ?", status).Find(&todos)
-		return todos, nil
+		db := repo.db.Where("status = ?", status).Find(&todos)
+		return todos, db.Error
 	}
-	repo.db.Find(&todos)
-	return todos, nil
+	db := repo.db.Find(&todos)
+	return todos, db.Error
+}
+
+// DeleteById deletes a todo from the database by id.
+func (repo *TodoRepo) DeleteById(id int) error {
+	db := repo.db.Delete(&Todo{ID: id})
+	return db.Error
 }
