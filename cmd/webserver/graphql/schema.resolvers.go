@@ -4,7 +4,6 @@ package graphql
 import (
 	"context"
 	"errors"
-	"fmt"
 	"html"
 	"time"
 
@@ -34,8 +33,16 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 }
 
 // GetTodos is the query resolver to return all todos.
-func (r *queryResolver) GetTodos(ctx context.Context) ([]*todo.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetTodos(ctx context.Context, statusP *string) ([]todo.Todo, error) {
+	status := ""
+	if statusP != nil {
+		status = *statusP
+	}
+	todos, err := r.TodoRepo.GetTodos(status)
+	if err != nil {
+		return nil, errors.New("An error occured while retrieiving todos !")
+	}
+	return todos, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

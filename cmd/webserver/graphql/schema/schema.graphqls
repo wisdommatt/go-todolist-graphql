@@ -20,5 +20,5 @@ type Mutation {
 }
 
 type Query {
-  getTodos: [Todo!]!
+  getTodos(status: String): [Todo!]!
 }

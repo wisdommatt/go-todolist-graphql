@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetTodos func(childComplexity int) int
+		GetTodos func(childComplexity int, status *string) int
 	}
 
 	Todo struct {
@@ -65,7 +65,7 @@ type MutationResolver interface {
 	CreateTodo(ctx context.Context, input model.NewTodo) (*todo.Todo, error)
 }
 type QueryResolver interface {
-	GetTodos(ctx context.Context) ([]*todo.Todo, error)
+	GetTodos(ctx context.Context, status *string) ([]todo.Todo, error)
 }
 
 type executableSchema struct {
@@ -100,7 +100,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.GetTodos(childComplexity), true
+		args, err := ec.field_Query_getTodos_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetTodos(childComplexity, args["status"].(*string)), true
 
 	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
@@ -216,7 +221,7 @@ type Mutation {
 }
 
 type Query {
-  getTodos: [Todo!]!
+  getTodos(status: String): [Todo!]!
 }
 `, BuiltIn: false},
 }
@@ -253,6 +258,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getTodos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["status"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["status"] = arg0
 	return args, nil
 }
 
@@ -352,9 +372,16 @@ func (ec *executionContext) _Query_getTodos(ctx context.Context, field graphql.C
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getTodos_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetTodos(rctx)
+		return ec.resolvers.Query().GetTodos(rctx, args["status"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -366,9 +393,9 @@ func (ec *executionContext) _Query_getTodos(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*todo.Todo)
+	res := resTmp.([]todo.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋwisdommattᚋgoᚑtodolistᚑgraphqlᚋinternalᚋtodoᚐTodoᚄ(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕgithubᚗcomᚋwisdommattᚋgoᚑtodolistᚑgraphqlᚋinternalᚋtodoᚐTodoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2115,7 +2142,7 @@ func (ec *executionContext) marshalNTodo2githubᚗcomᚋwisdommattᚋgoᚑtodoli
 	return ec._Todo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋwisdommattᚋgoᚑtodolistᚑgraphqlᚋinternalᚋtodoᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*todo.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚕgithubᚗcomᚋwisdommattᚋgoᚑtodolistᚑgraphqlᚋinternalᚋtodoᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []todo.Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2139,7 +2166,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋwisdommattᚋgoᚑ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋwisdommattᚋgoᚑtodolistᚑgraphqlᚋinternalᚋtodoᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalNTodo2githubᚗcomᚋwisdommattᚋgoᚑtodolistᚑgraphqlᚋinternalᚋtodoᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
