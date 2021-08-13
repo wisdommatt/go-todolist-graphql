@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 // Repository is the interface that describes a todo repository object.
 type Repository interface {
 	Save(todo *Todo) error
+	GetTodoById(id int) (todo Todo, err error)
 	GetTodos(status string) (todos []Todo, err error)
 }
 
@@ -24,6 +25,12 @@ func NewRepository(db *gorm.DB) *TodoRepo {
 func (repo *TodoRepo) Save(todo *Todo) error {
 	repo.db.Create(todo)
 	return nil
+}
+
+// GetTodoById retrieves a todo from the database by id.
+func (repo *TodoRepo) GetTodoById(id int) (todo Todo, err error) {
+	repo.db.Where("id = ?", id).First(&todo)
+	return todo, nil
 }
 
 // GetTodos retrieves todos from the database by filter.
