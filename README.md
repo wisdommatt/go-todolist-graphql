@@ -5,6 +5,6 @@ Graphql todolist API with MySql database.
 
 ## RUN
 
-`go mod fix`
+`go mod tidy`
 
 `go run cmd/webserver/main.go`
