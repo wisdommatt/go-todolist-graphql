@@ -18,7 +18,11 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	dbConn, err := gorm.Open(mysql.Open("root:@tcp(127.0.0.1:3306)/todo-list?charset=utf8&parseTime=true"), &gorm.Config{})
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		dbURL = "root:@tcp(127.0.0.1:3306)/todo-list?charset=utf8&parseTime=true"
+	}
+	dbConn, err := gorm.Open(mysql.Open(dbURL), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
